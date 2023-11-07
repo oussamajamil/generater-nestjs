@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("BACKEND_DATABASE_URL")
+}
+
+// TODO: add postgis extension for geofancing
+
+// enum Role {
+//     SYS_ADMIN
+//     PLANT_MANAGER
+//     SHIFT_MANAGER
+//     TEAM_LEADER
+//     MAINTENANCE_MANAGER
+//     TECHNICIAN
+//     WORKER
+// }
+
+// model Shift {
+//     id         Int      @id @default(autoincrement())
+//     name       String
+//     startTime  DateTime @map("start_time")
+//     endTime    DateTime @map("end_time")
+//     breakStart DateTime @map("break_start")
+//     breakEnd   DateTime @map("break_end")
+//     plant      Plant    @relation(fields: [plantId], references: [id])
+//     plantId    Int      @map("plant_id")
+
+//     createdAt DateTime           @default(now()) @map("created_at")
+//     updatedAt DateTime           @updatedAt @map("updated_at")
+//     teams     ShiftAffiliation[]
+
+//     @@unique([plantId, name])
+//     @@map("shifts")
+// }
+
+// model Region {
+//     id   Int    @id @default(autoincrement())
+//     name String @unique
+
+//     createdAt DateTime  @default(now()) @map("created_at")
+//     updatedAt DateTime  @updatedAt @map("updated_at")
+//     countries Country[]
+
+//     @@map("regions")
+// }
+
+// model Country {
+//     id       Int     @id @default(autoincrement())
+//     name     String  @unique
+//     region   Region? @relation(fields: [regionId], references: [id])
+//     regionId Int?    @map("region_id")
+//     // TODO: chnnge name
+//     logo     String? // file  
+
+//     createdAt DateTime @default(now()) @map("created_at")
+//     updatedAt DateTime @updatedAt @map("updated_at")
+//     plants    Plant[]
+
+//     @@map("countries")
+// }
+
+// model Plant {
+//     id          Int      @id @default(autoincrement())
+//     name        String   @unique
+//     description String?
+//     country     Country? @relation(fields: [countryId], references: [id])
+//     logo        String? // file  
+//     lat         Float?
+//     lng         Float?
+//     countryId   Int?     @map("country_id")
+//     manager     User?    @relation("plant_manager", fields: [managerId], references: [id])
+
+//     createdAt DateTime @default(now()) @map("created_at")
+//     updatedAt DateTime @updatedAt @map("updated_at")
+//     lines     Line[]
+//     managerId Int?     @map("manager_id")
+//     employees User[]
+//     shifts    Shift[]
+
+//     @@map("plants")
+// }
+
+// model Line {
+//     id          Int     @id @default(autoincrement())
+//     name        String  @unique
+//     description String?
+//     plantId     Int     @map("plant_id")
+//     logo        String? // file  
+//     polygon     Json    @default("[]")
+//     pant        Plant   @relation(fields: [plantId], references: [id])
+
+//     createdAt DateTime @default(now()) @map("created_at")
+//     updatedAt DateTime @updatedAt @map("updated_at")
+//     teams     Team[]
+
+//     @@map("lines")
+// }
+
+// model ShiftAffiliation {
+//     id        Int      @id @default(autoincrement())
+//     shift     Shift    @relation(fields: [shiftId], references: [id])
+//     shiftId   Int      @map("shift_id")
+//     team      Team     @relation(fields: [teamId], references: [id])
+//     teamId    Int      @map("team_id")
+//     startDate DateTime @map("start_date")
+//     endDate   DateTime @map("end_date")
+
+//     @@unique([shiftId, teamId])
+//     @@map("shift_affiliations")
+// }
+
+// model Team {
+//     id         Int    @id @default(autoincrement())
+//     name       String @unique
+//     teamLead   User?  @relation("team_led", fields: [teamLeadId], references: [id])
+//     teamLeadId Int?   @unique @map("team_lead_id")
+
+//     line    Line   @relation(fields: [lineId], references: [id])
+//     workers User[]
+//     // TODO: add shift
+
+//     createdAt DateTime           @default(now()) @map("created_at")
+//     updatedAt DateTime           @updatedAt @map("updated_at")
+//     lineId    Int                @map("line_id")
+//     shifts    ShiftAffiliation[]
+
+//     @@map("teams")
+// }
+
+// model User {
+//     id           Int     @id @default(autoincrement())
+//     firstName    String  @map("first_name")
+//     lastName     String  @map("last_name")
+//     email        String  @unique
+//     role         Role
+//     isFirstLogin Boolean @default(true) @map("is_first_login")
+
+//     createdAt     DateTime @default(now()) @map("created_at")
+//     updatedAt     DateTime @updatedAt @map("updated_at")
+//     team          Team?    @relation("team_led")
+//     managedPlants Plant[]  @relation("plant_manager")
+//     plantId       Int?     @map("plant_id")
+//     plant         Plant?   @relation(fields: [plantId], references: [id])
+//     Team          Team?    @relation(fields: [teamId], references: [id])
+//     teamId        Int?     @map("team_id")
+
+//     @@map("users")
+// }
