@@ -49,10 +49,9 @@ const getModal = (path: string) => {
         }),
     };
   });
-
-  // console.log({
-  //   res
-  // })
+  console.log({
+    res: JSON.stringify(res, null, 2),
+  });
   res?.forEach((item) => {
     item.isFormdata = item?.content?.some((ele) =>
       ele.validation.some((ele) => ele?.includes('file')),
@@ -189,9 +188,15 @@ const generateModule = (ele: any) => {
 };
 
 const generateService = (ele: any) => {
+  console.log('---', {
+    ele: JSON.stringify(ele, null, 2),
+  });
+
   const name = lowerFirst(ele.name);
   const primaryKey =
     ele?.content?.filter((ele) => ele.isPrimary)[0].name || 'id';
+  const primaryKeyType =
+    ele?.content?.filter((ele) => ele.isPrimary)[0].type || 'number';
   const dt = `import { Injectable } from '@nestjs/common';
     import { PrismaService } from 'src/prisma.service';
     import { ConvertQueries } from '@/utils/function';
@@ -211,7 +216,7 @@ const generateService = (ele: any) => {
     }
     
     @ConvertQueries()
-    async findOne(${primaryKey}: number, query?: any) {
+    async findOne(${primaryKey}: ${primaryKeyType.toLowerCase()}, query?: any) {
       return await this.prisma.${name}.findUnique({ where:{ ${primaryKey}},...query });
     }
 
@@ -219,26 +224,16 @@ const generateService = (ele: any) => {
       return await this.prisma.${name}.create({ data });
     }
 
-    async update(${primaryKey}: number, data: Update${ele.name}Dto) {
+    async update(${
+      primaryKey + ':' + primaryKeyType.toLowerCase()
+    }, data: Update${ele.name}Dto) {
       return await this.prisma.${name}.update({ where: { ${primaryKey} }, data });
     }
     
-    async remove(${primaryKey}: number) {
+    async remove(${primaryKey}: 
+      ${primaryKeyType.toLowerCase()}
+    ) {
       return await this.prisma.${name}.delete({ where: { ${primaryKey} } });
-    }
-    
-    async removeAll() {
-      return await this.prisma.${name}.deleteMany({
-        where: {
-          id: {
-            not: 0,
-          },
-        },
-      });
-    }
-
-    async addMany(data: Create${ele.name}Dto[]) {
-      return await this.prisma.${name}.createMany({ data });
     }
   }
     `;
@@ -254,6 +249,8 @@ const generateController = (ele: any) => {
 
   const primaryKey =
     ele?.content?.filter((ele) => ele.isPrimary)[0].name || 'id';
+  const primaryKeyType =
+    ele?.content?.filter((ele) => ele.isPrimary)[0].type || 'number';
   const dt = `
     import {
       Controller,
@@ -307,7 +304,13 @@ const generateController = (ele: any) => {
       @UseInterceptors(NotFoundInterceptor) 
       @ApiOkResponse({ type: ${ele.name}Dto })
       @Get(':${primaryKey}')
-      findOne(@Query() query: any, @Param('${primaryKey}', ParseIntPipe) ${primaryKey}: number) {
+      findOne(@Query() query: any,
+      ${
+        primaryKeyType.toLowerCase() === 'number'
+          ? `@Param('${primaryKey}', ParseIntPipe) ${primaryKey}: number`
+          : `@Param('${primaryKey}') ${primaryKey}: string`
+      }
+      ) {
         return this.${name}Service.findOne(${primaryKey}, query);
       }
   
@@ -459,9 +462,12 @@ const generateController = (ele: any) => {
          `
             : ``
         }
-        @Param('${primaryKey}', ParseIntPipe) ${primaryKey}: number, @Body() data: Update${
-    ele.name
-  }Dto) {
+        ${
+          primaryKeyType.toLowerCase() === 'number'
+            ? `@Param('${primaryKey}', ParseIntPipe) ${primaryKey}: number`
+            : `@Param('${primaryKey}') ${primaryKey}: string`
+        }
+       ,@Body() data: Update${ele.name}Dto) {
     try{\n
       ${
         filedFile.length === 1
@@ -518,7 +524,13 @@ const generateController = (ele: any) => {
     
       @ApiOkResponse({ type: ${ele.name}Dto })
       @Delete(':${primaryKey}')
-      remove(@Param('${primaryKey}', ParseIntPipe) ${primaryKey}: number) {
+      remove
+      (
+      ${
+        primaryKeyType.toLowerCase() === 'number'
+          ? `@Param('${primaryKey}', ParseIntPipe) ${primaryKey}: number`
+          : `@Param('${primaryKey}') ${primaryKey}: string`
+      }){
         const data = this.${name}Service.remove(${primaryKey});
         ${
           filedFile.length === 1
@@ -553,17 +565,6 @@ const generateController = (ele: any) => {
             : ``
         }
         return data;
-      }
-    
-      @ApiOkResponse({ type: ${ele.name}Dto, isArray: true })
-      @Post('/bulk')
-      bulkCreate(@Body() data: Create${ele.name}Dto[]) {
-        return this.${name}Service.addMany(data);
-      }
-      @ApiOkResponse({ type: ${ele.name}Dto, isArray: true })
-      @Delete('/bulk/delete-all')
-      bulkDelete() {
-        return this.${name}Service.removeAll();
       }
     }
     `;
@@ -793,16 +794,6 @@ const main = () => {
         }
       }
     }
-    // if (namesModal.includes(config['auth'].model)) {
-    //   const auth = config['auth'];
-    //   const authModel = res.find((item) => item.name === auth.model);
-    //   if (
-    //     authModel.content.some((item) => item.name === auth.email) &&
-    //     authModel.content.some((item) => item.name === auth.password)
-    //   ) {
-    //     authGenerator(auth, authModel);
-    //   }
-    // }
   } catch (error) {
     console.log(error);
   }

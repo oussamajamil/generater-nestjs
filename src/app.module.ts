@@ -16,8 +16,23 @@ import redisStore from './redis';
 
 import {UserModule}  from '@/routes/user/user.module';
 
+import {UserModule}  from '@/routes/user/user.module';
+
+import {UserModule}  from '@/routes/user/user.module';
+
+import {UserModule}  from '@/routes/user/user.module';
+
+import {UserModule}  from '@/routes/user/user.module';
+
+import {UserModule}  from '@/routes/user/user.module';
+
 @Module({
   imports: [
+UserModule,
+UserModule,
+UserModule,
+UserModule,
+UserModule,
 UserModule,
     CacheModule.register(),
     MulterModule.register({
