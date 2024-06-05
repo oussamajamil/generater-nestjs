@@ -36,8 +36,8 @@ const getModal = (path: string) => {
             validation: validation
               ?.filter(
                 (ele) =>
-                  !ele.includes('@@map') &&
-                  !ele.includes(' @@unique') &&
+                  !ele?.includes('@@map') &&
+                  !ele?.includes(' @@unique') &&
                   !ele?.includes('@default') &&
                   !ele?.includes('@unique') &&
                   !ele?.includes('@id') &&
@@ -49,6 +49,10 @@ const getModal = (path: string) => {
         }),
     };
   });
+
+  // console.log({
+  //   res
+  // })
   res?.forEach((item) => {
     item.isFormdata = item?.content?.some((ele) =>
       ele.validation.some((ele) => ele?.includes('file')),
@@ -91,15 +95,17 @@ const genertateEntity = (item: any, enums: string[], models: string[]) => {
     if (!models.includes(ele.type?.replace('[]', ''))) {
       dto += `@ApiProperty({required: ${ele.IsRequired} 
             ${
-              enums.includes(ele.type) ? `, type: 'enum', enum:${ele.type}` : ''
+              enums?.includes(ele.type)
+                ? `, type: 'enum', enum:${ele.type}`
+                : ''
             }})\n`;
       if (
         !ele.IsRequired ||
-        ele.validation.some((dt) => dt.includes('file' || 'files'))
+        ele.validation.some((dt) => dt?.includes('file' || 'files'))
       )
         dto += `  @IsOptional()\n`;
 
-      if (filesContent.includes(ele.name) && isMultiplefile) {
+      if (filesContent?.includes(ele.name) && isMultiplefile) {
         dto += ` @Transform(({ value }) => value[0] || undefined)\n`;
       }
 
@@ -113,7 +119,7 @@ const genertateEntity = (item: any, enums: string[], models: string[]) => {
           isFormdata &&
           config[ele.type]?.type !== 'string' &&
           config[ele.type]?.type !== 'string[]' &&
-          !enums.includes(ele.type)
+          !enums?.includes(ele.type)
         ) {
           dto += `@Transform(({ value }) => safeParse(value))\n`;
         }
@@ -131,13 +137,13 @@ const genertateEntity = (item: any, enums: string[], models: string[]) => {
       } else {
         createDto += `'${ele.name}', `;
       }
-      if (enums.includes(ele.type)) {
+      if (enums?.includes(ele.type)) {
         enumdata += (enumdata && ', ') + ele.type;
         dto += `@IsEnum(${ele.type})\n`;
       }
       dto += `  ${ele.name}: ${
         config[ele.type]?.type ||
-        (enums.includes(ele.type) && ele.type) ||
+        (enums?.includes(ele.type) && ele.type) ||
         'any'
       };\n`;
     }
@@ -241,7 +247,7 @@ const generateService = (ele: any) => {
 
 const generateController = (ele: any) => {
   const filedFile = ele.content.filter((res) =>
-    res.validation.some((res) => res.includes('file' || 'files')),
+    res.validation.some((res) => res?.includes('file' || 'files')),
   );
 
   const name = lowerFirst(ele.name);
@@ -262,7 +268,7 @@ const generateController = (ele: any) => {
       ${
         filedFile.length === 1 && filedFile?.[0]?.name
           ? `UploadedFile${
-              filedFile?.[0]?.validation.includes('files') ? 's' : ''
+              filedFile?.[0]?.validation?.includes('files') ? 's' : ''
             },`
           : filedFile.length > 1
           ? 'UploadedFiles,'
@@ -310,15 +316,15 @@ const generateController = (ele: any) => {
       ${
         filedFile.length === 1 && filedFile?.[0]?.name
           ? `@UseInterceptors(File${
-              filedFile?.[0]?.validation.includes('files') ? 's' : ''
+              filedFile?.[0]?.validation?.includes('files') ? 's' : ''
             }Interceptor('${filedFile?.[0]?.name}', 
-          ${filedFile?.[0]?.validation.includes('files') ? '20,' : ''}
+          ${filedFile?.[0]?.validation?.includes('files') ? '20,' : ''}
           multerConfig))`
           : filedFile.length > 1
           ? `@UseInterceptors(
             FileFieldsInterceptor(
                 ${JSON.stringify(
-                  filedFile.map((ele) => {
+                  filedFile?.map((ele) => {
                     return {
                       name: ele.name,
                       maxCount: ele.type === 'String[]' ? 10 : 1,
@@ -335,7 +341,7 @@ const generateController = (ele: any) => {
      async create(${
        filedFile?.length === 1
          ? `@UploadedFile${
-             filedFile?.[0]?.validation.includes('files') ? 's' : ''
+             filedFile?.[0]?.validation?.includes('files') ? 's' : ''
            }() files,`
          : filedFile?.length > 1
          ? `@UploadedFiles()\n
@@ -355,7 +361,7 @@ const generateController = (ele: any) => {
            ${
              filedFile.length === 1
                ? ` if (files)\n${
-                   filedFile?.[0]?.validation.includes('file')
+                   filedFile?.[0]?.validation?.includes('file')
                      ? `data['${filedFile?.[0]?.name}'] = files.filename`
                      : filedFile?.[0]?.validation?.includes('files')
                      ? `data['${filedFile?.[0]?.name}'] = files.map((file) => file.filename);\n`
@@ -371,11 +377,11 @@ const generateController = (ele: any) => {
             ? `}\n catch(err){
               if (files){\n
           ${
-            filedFile?.[0]?.validation.includes('file')
+            filedFile?.[0]?.validation?.includes('file')
               ? `multerConfig.storage._removeFile(null, files, () => {
                 void 0;
               });`
-              : filedFile?.[0]?.validation.includes('files')
+              : filedFile?.[0]?.validation?.includes('files')
               ? `files?.forEach((file) => {
                 multerConfig.storage._removeFile(null, file, () => {
                   void 0;
@@ -413,9 +419,9 @@ const generateController = (ele: any) => {
       ${
         filedFile.length === 1 && filedFile?.[0]?.name
           ? `@UseInterceptors(File${
-              filedFile?.[0]?.validation.includes('files') ? 's' : ''
+              filedFile?.[0]?.validation?.includes('files') ? 's' : ''
             }Interceptor('${filedFile?.[0]?.name}', 
-          ${filedFile?.[0]?.validation.includes('files') ? '20,' : ''}
+          ${filedFile?.[0]?.validation?.includes('files') ? '20,' : ''}
           multerConfig))`
           : filedFile.length > 1
           ? `@UseInterceptors(
@@ -439,7 +445,7 @@ const generateController = (ele: any) => {
         ${
           filedFile?.length === 1 && filedFile?.[0]?.name
             ? `@UploadedFile${
-                filedFile?.[0]?.validation.includes('files') ? 's' : ''
+                filedFile?.[0]?.validation?.includes('files') ? 's' : ''
               }() files,`
             : filedFile?.length > 1
             ? `@UploadedFiles()\n
@@ -460,7 +466,7 @@ const generateController = (ele: any) => {
       ${
         filedFile.length === 1
           ? ` if (files)\n${
-              filedFile?.[0]?.validation.includes('file')
+              filedFile?.[0]?.validation?.includes('file')
                 ? `data['${filedFile?.[0]?.name}'] = files.filename`
                 : filedFile?.[0]?.validation?.includes('files')
                 ? `data['${filedFile?.[0]?.name}'] = files.map((file) => file.filename);\n`
@@ -474,11 +480,11 @@ const generateController = (ele: any) => {
             ? `}\n catch(err){
               if (files){\n
           ${
-            filedFile?.[0]?.validation.includes('file')
+            filedFile?.[0]?.validation?.includes('file')
               ? `multerConfig.storage._removeFile(null, files, () => {
                 void 0;
               });`
-              : filedFile?.[0]?.validation.includes('files')
+              : filedFile?.[0]?.validation?.includes('files')
               ? `files?.forEach((file) => {
                 multerConfig.storage._removeFile(null, file, () => {
                   void 0;
@@ -771,6 +777,7 @@ const main = () => {
             else if (process.argv[2] === '-u')
               generateAllFiles(item, enums, namesModal, '-u');
           } catch (err) {
+            console.log(err);
             console.log('error in create ');
           }
         });

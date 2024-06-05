@@ -14,8 +14,11 @@ import { MiddlewareAuth } from './common/middleware/auth.middleware';
 import { RolesGuard } from './common/guard/roles.guard';
 import redisStore from './redis';
 
+import {UserModule}  from '@/routes/user/user.module';
+
 @Module({
   imports: [
+UserModule,
     CacheModule.register(),
     MulterModule.register({
       dest: join(__dirname, '..', '..', 'uploads'),
