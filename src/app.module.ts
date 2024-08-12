@@ -26,8 +26,14 @@ import {UserModule}  from '@/routes/user/user.module';
 
 import {UserModule}  from '@/routes/user/user.module';
 
+import {UserModule}  from '@/routes/user/user.module';
+
+import {TestModule}  from '@/routes/test/test.module';
+
 @Module({
   imports: [
+TestModule,
+UserModule,
 UserModule,
 UserModule,
 UserModule,
